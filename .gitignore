@@ -1,0 +1,18 @@
+# Archivos/Directorios Generados (Debe ignorarse)
+
+# 1. Entorno Virtual de Python
+venv/
+
+# 2. Caché y Compilaciones de Python
+__pycache__/
+*.pyc
+*.o
+
+# 3. Base de Datos SQLite (Archivo local)
+# La base de datos local no debe subirse, ya que cada desarrollador
+# debe tener su propia instancia.
+*.db
+tareas.db 
+
+# 4. Archivos de Editor/OS
+.DS_Store
