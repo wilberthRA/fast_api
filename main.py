@@ -51,6 +51,18 @@ def create_user(user: UserCreate, db: Session=Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
+@app.get("/users/")
+def read_users(skip: int = 0, Limit: int = 10, db: Session = Depends(get_db)):
+    users = db.query(User).offset(skip).limit(Limit).all()
+    return users
+
+@app.get("/users/{user_id}")
+def read_users(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code = 404, details = "User not found")
+    return user
+    
 class Tarea(BaseModel):
     titulo: str
     descripcion: str
@@ -66,14 +78,3 @@ def login(usuario:Usuario):
         return {"login"}
     else:
         return {"Incorrecto"}
-
-@app.get("/")
-def read_root():
-    return {"Hello world"}
-
-@app.get("/suma/{numero1}/{numero2}")
-def mensaje_2(numero1: int, numero2: int):
-    var = numero1 + numero2
-    return {var}
-
-
