@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from datetime import date
 from pydantic import BaseModel
+from typing import Optional
 
 from sqlalchemy import create_engine, Column, Integer, String, Date
 from sqlalchemy.ext.declarative import declarative_base
@@ -62,19 +63,28 @@ def read_users(user_id: int, db: Session = Depends(get_db)):
     if user is None:
         raise HTTPException(status_code = 404, details = "User not found")
     return user
-    
-class Tarea(BaseModel):
-    titulo: str
-    descripcion: str
-    tiempo: date
+ 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
 
-class Usuario(BaseModel):
-    correo: str
-    contraseña: str
+@app.post("/users/{user_id}")
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code = 404, details = "User not found")
+    db_user.name = user.name if user.name is not None else db_user.name
+    db_user.email = user.email if user.email is not None else db_user.email
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
-@app.post("/login")
-def login(usuario:Usuario):
-    if usuario.correo == "ejemplo@gmail.com" and usuario.contraseña == "1234":
-        return {"login"}
-    else:
-        return {"Incorrecto"}
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code = 404, details = "User not found")
+
+    db.delete(db_user)
+    db.commit()
+    return db_user
