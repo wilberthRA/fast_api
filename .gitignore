@@ -16,3 +16,5 @@ tareas.db
 
 # 4. Archivos de Editor/OS
 .DS_Store
+
+old_main.py

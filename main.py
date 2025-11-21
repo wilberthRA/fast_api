@@ -24,12 +24,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
-@app.get("/users/")
-def read_users(skip: int = 0, Limit: int = 10, db: Session = Depends(get_db)):
-    users = db.query(User).offset(skip).limit(Limit).all()
-    return users
-
-@app.post("/users/")
+@app.post("/registrer/")
 def registrer(user: UserCreate, db:Session = Depends(get_db)):
     hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
     db_user = User(
@@ -55,6 +50,47 @@ def login(user: userLogin, db:Session = Depends(get_db)):
         return {"status":"succes", "message":"Welcome"}
     else:
         return {"status":"Error","message":"Password incorrect"}
+
+@app.get("/users/")
+def read_users(skip: int = 0, Limit: int = 10, db: Session = Depends(get_db)):
+    users = db.query(User).offset(skip).limit(Limit).all()
+    return users
+
+class taskCreate(BaseModel):
+    titulo: str
+    descripcion: str
+    tiempo: date
+
+@app.post("/tasks/")
+def create_task(task: taskCreate, db: Session = Depends(get_db)):
+    db_task = TareaDB(
+            titulo = task.titulo,
+            descripcion = task.descripcion,
+            tiempo = task.tiempo
+            )
+    db.add(db_task)
+    db.commit()
+    db.refresh(db_task)
+    return db_task
+
+@app.get("/tasks/")
+def read_tasks(skip: int = 0, Limit: int = 10, db: Session = Depends(get_db)):
+    tasks = db.query(TareaDB).offset(skip).limit(Limit).all()
+    return tasks
+
+@app.get("/tasks/{id_task}")
+def read_tasks(task_id: int, db:Session = Depends(get_db)):
+    task = db.query(TareaDB).filter(TareaDB.id == task_id).first()
+    if task is None:
+        raise HTTPException(status_code = 404, details = "User not found")
+    return task
+
+
+
+
+
+
+
 
 
 
